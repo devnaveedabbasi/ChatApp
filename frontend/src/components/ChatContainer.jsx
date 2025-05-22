@@ -1,0 +1,52 @@
+import { Icon } from '@iconify/react';
+import { useParams } from 'react-router-dom';
+import { chats } from '../constant/data';
+import { useChatStore } from '../store/useChatStore';
+import { Logo, Logo2 } from '../assets';
+import ChatHeader from './ChatHeader';
+import { useEffect } from 'react';
+import Welcome from './Welcome';
+import MessageInput from './MessageInput';
+import ChatMessages from './ChatMessages';
+
+const ChatContainer = () => {
+  const {selectedUser,message,isMessagesLoading,getMessages}=useChatStore()
+
+
+
+  useEffect(() => {
+  if (selectedUser?._id) {
+    getMessages(selectedUser._id);
+  }
+}, [selectedUser, getMessages]);
+
+ if (isMessagesLoading) {
+    return (
+      <div className="flex-1 flex flex-col overflow-auto">
+        <ChatHeader />
+      </div>
+    );
+  }
+
+  if (!selectedUser) {
+    return (
+   <Welcome/>
+    );
+  }
+
+  return (
+    <div className="flex-1 flex flex-col  bg-[#f2feff]">
+      <ChatHeader/>
+     
+      
+      <div className="flex-1 p-4 overflow-y-auto ">
+      <ChatMessages/>
+      </div>
+
+
+   <MessageInput/>
+    </div>
+  );
+};
+
+export default ChatContainer;

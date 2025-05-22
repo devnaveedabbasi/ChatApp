@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { FullLogo } from "../assets";
 import { Toaster } from "react-hot-toast";
@@ -17,8 +16,7 @@ export default function ForgotPassword() {
 
     const res = await forgotPassword({ email });
     if (res.success) {
-      // Navigate or show success message
-      // navigate("/check-your-email");
+         email=''
     }
   };
 

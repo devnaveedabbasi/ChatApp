@@ -1,4 +1,4 @@
-import { app } from "./src/app.js";
+import { app ,server} from "./src/app.js";
 import dotenv from "dotenv";
 import connectDb from "./src/config/db.config.js";
 
@@ -13,7 +13,7 @@ app.on("error", (error) => {
 
 connectDb()
   .then(() => {
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server is running at port: ${PORT}`);
     });
   })

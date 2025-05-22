@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import { axiosIntance } from '../lib/axios.js'; 
 import toast from "react-hot-toast";
+import { io } from 'socket.io-client';
+
+
+const socket = io('http://localhost:4000', {
+  withCredentials: false
+});
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
@@ -14,11 +20,13 @@ export const useAuthStore = create((set, get) => ({
   isCheckingAuth: true,
   onlineUsers: [],
   socket: null,
+  
 
-  checkAuth: async () => {
+checkAuth: async () => {
     try {
       const res = await axiosIntance.get("/auth/check-auth");  
-      set({ authUser: res.data });
+      set({ authUser: res.data.data });
+            // get().connectSocket();
     } catch (error) {
       set({ authUser: null });
       console.log("Error in checkAuth:", error);
@@ -34,6 +42,8 @@ export const useAuthStore = create((set, get) => ({
     try {
         const res = await axiosIntance.post("/auth/register", data);
         toast.success("Account created successfully");
+              get().connectSocket();
+
         return res.data; 
     } catch (error) {
         toast.error(error?.response?.data?.message || "Signup failed");
@@ -87,7 +97,9 @@ login: async (data) => {
   try {
     const res = await axiosIntance.post(`/auth/login`,data);
     toast.success("login successfully");
-    return { success: true };
+          // get().connectSocket();
+
+    return res;
   } catch (error) {
     toast.error(error?.response?.data?.message || "login failed");
     return { success: false };
@@ -128,6 +140,49 @@ resetPassword: async (data, token) => {
     set({ isReseting: false });
   }
 }
+
+,
+
+//  connectSocket: () => {
+//     const { authUser } = get();
+//     if (!authUser || get().socket?.connected) return;
+
+//     const socket = io(BASE_URL, {
+//       query: {
+//         userId: authUser._id,
+//       },
+//     });
+//     socket.connect();
+
+//     set({ socket: socket });
+
+//     socket.on("getOnlineUsers", (userIds) => {
+//       set({ onlineUsers: userIds });
+//     });
+//   },
+//   disconnectSocket: () => {
+//     if (get().socket?.connected) get().socket.disconnect();
+//   },
+
+
+
+setOnlineUsers: (onlineUsers) => set({ onlineUsers }),
+
+
+
+connectSocket: () => {
+  const { authUser } = get();
+  if (!authUser || get().socket?.connected) return;
+
+  
+  socket.emit("addUser", authUser._id);
+  set({ socket: socket });
+
+  socket.on("getOnlineUsers", (userIds) => {
+    set({ onlineUsers: userIds });
+    console.log(userIds)
+  });
+},
 
 
 }));

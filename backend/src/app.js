@@ -4,8 +4,32 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 dotenv.config({ path: "./.env" });
-
+import { Server } from "socket.io";
+import http, { createServer } from 'http'
 export const app = express();
+export const server=createServer(app)
+
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: ["GET", "POST"],
+    credentials: false,
+  }
+});
+
+app.set('io', io);
+handleSocket(io)
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected:', socket.id);
+  });
+});
+
+
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
@@ -27,4 +51,5 @@ app.use("/api/message", messageRoute);
 
 
 import errorHandler from "./middlewears/errorHandler.js";
+import handleSocket from "./utlis/handleOnlineUsers.js";
 app.use(errorHandler);

@@ -281,7 +281,7 @@ export const forgetPassword = asyncHandler(async (req, res) => {
 
 
 export const resetPassword = asyncHandler(async (req, res) => {
-  const token = decodeURIComponent(req.params.token);
+  const token = decodeURIComponent(req.query.token);
 
   const { newPassword, confirmPassword } = req.body;
 

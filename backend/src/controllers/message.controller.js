@@ -14,23 +14,30 @@ export const getUserForSidebar=asyncHandler(async(req,res)=>{
 })
 
 
-export const getMessages =asyncHandler(async(req,res)=>{
-    const {id:userToChatId}=req.params
-    const myId=req.user._id
+export const getMessages = asyncHandler(async (req, res) => {
+  const { id: userToChatId } = req.params;
+  const myId = req.user._id;
 
-    const message=await Message.find({
-        $or:[
-            {senderId:myId,receverId:userToChatId},
-            {senderId:userToChatId,receverId:myId},
-        ]
-    })
+  console.log("Fetching messages between:", myId, "and", userToChatId);
 
-    return res.status(200).json(new ApiResponse(200,message,"succesfully fetch messages"))
-})
+  const messages = await Message.find({
+    $or: [
+      { senderId: myId, receiverId: userToChatId },
+      { senderId: userToChatId, receiverId: myId },
+    ],
+  });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, messages, "Successfully fetched messages"));
+});
+
+
 
 export const sendMessage=asyncHandler(async(req,res)=>{
 
-    const {text,image}=req.body
+    const {text}=req.body
+  const image = req.file?.path;  
 
     const {id:receiverId}=req.params
 
@@ -49,6 +56,7 @@ export const sendMessage=asyncHandler(async(req,res)=>{
         text,
         image:imageUrl
     })
+        req.app.get('io').emit('newMessage', newMessage);  
 
     await newMessage.save()
 

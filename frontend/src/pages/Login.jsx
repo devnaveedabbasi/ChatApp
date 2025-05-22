@@ -35,12 +35,12 @@ export default function Login() {
       };
 
       const res = await login(formData);
-
-      if (res.success) {
+      console.log(res)
+      if(res.status===200){
         navigate(`/`);
-      } else {
-        console.error("Login failed");
       }
+
+     
     } catch (error) {
       console.error("Login failed:", error);
     }

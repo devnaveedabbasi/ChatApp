@@ -1,9 +1,13 @@
-import React from 'react'
+import ChatListSidebar from '../components/ChatListSidebar';
+import { Outlet } from 'react-router-dom';
 
-export default function HomePage() {
+const HomePage = () => {
   return (
-    <div>
-      HomePage
+    <div className="flex flex-1">
+      <ChatListSidebar />
+      <Outlet />
     </div>
-  )
-}
+  );
+};
+
+export default HomePage;

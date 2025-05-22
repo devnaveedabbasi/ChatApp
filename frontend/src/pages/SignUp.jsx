@@ -7,7 +7,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { Link, useNavigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
-export default function SignUpPage() {
+export default function SignUpPage() {``
   const [showPassword, setShowPassword] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const navigate = useNavigate();
