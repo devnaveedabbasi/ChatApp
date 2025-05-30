@@ -10,7 +10,7 @@ const IconSidebar = () => {
 
 
   const topLinks = [
-    { path: "/chats", icon: "ic:round-message" },
+    { path: "/", icon: "ic:round-message" },
     { path: "/status", icon: "ic:round-people" },
     { path: "/favorites", icon: "material-symbols:star-outline" },
   ];

@@ -2,13 +2,17 @@ import { Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLayoutStore } from "../store/useLayout";
 import { useChatStore } from "../store/useChatStore";
+import Welcome from "../components/Welcome";
+import ChatPage from "../pages/ChatPage";
 
 const MiddleSidebarLayout = ({ sidebar }) => {
   const { isIconSidebarHide } = useLayoutStore();
-const {selectedUser}=useChatStore()
+  const { selectedUser } = useChatStore();
+
   return (
-    <div className="flex flex-1 relative md:w-80 w-full bg-red-200">
+    <div className="flex flex-1 relative ">
       <AnimatePresence mode="wait">
+        {/* When sidebar is fully visible */}
         {!isIconSidebarHide && (
           <motion.div
             key="sidebar-open"
@@ -18,13 +22,20 @@ const {selectedUser}=useChatStore()
             transition={{ duration: 0.3 }}
             className="flex flex-1"
           >
-            <div className="border-r border-gray-200 !w-full">{sidebar}</div>
-            <div className="md:flex hidden   bg-gray-500">
-              <Outlet />
+            {/* Sidebar */}
+            <div className={` w-full md:w-[320px] border-r border-gray-200`}>
+              {sidebar}
+            </div>
+
+            {/* Main content (hidden on small screens) */}
+            <div className="hidden flex-2/3 md:flex flex-row-reverse">
+              <Outlet/>
+              {/* {selectedUser ? <Outlet /> : <Welcome />} */}
             </div>
           </motion.div>
         )}
 
+        {/* When sidebar is minimized (icon-only) */}
         {isIconSidebarHide && (
           <motion.div
             key="sidebar-closed"
@@ -34,9 +45,18 @@ const {selectedUser}=useChatStore()
             transition={{ duration: 0.3 }}
             className="flex flex-1"
           >
-            <div className={`border-r md:w-80 ${selectedUser ?'hidden' :'w-full'} border-gray-200 bg-white`}>{sidebar}</div>
-            <div className={`md:flex ${selectedUser?'flex':"hidden"} flex-1 bg-gray-50`}>
-              <Outlet />
+            {/* Sidebar (full width on mobile, fixed on desktop) */}
+            <div
+              className={`${
+                selectedUser ? "md:inline-block hidden" : "block"
+              }  w-full md:w-[320px] border-r border-gray-200`}
+            >
+              {sidebar}
+            </div>
+
+            {/* Main content (hidden on small screens) */}
+            <div className="hidden flex-2/3 md:flex flex-row-reverse">
+              <Outlet/>
             </div>
           </motion.div>
         )}

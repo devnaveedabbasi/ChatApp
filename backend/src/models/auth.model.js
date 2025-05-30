@@ -24,7 +24,13 @@ const userSchema = new Schema(
     profilePic: {
       type: String,
       default:"https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
-    },
+    },friends: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  }
+],
+
     isVerified: {
       type: Boolean,
       default: false,

@@ -13,17 +13,15 @@ import ProfilePage from '../pages/Profile';
 import OtpPage from '../pages/VerifyOtp';
 import ForgotPassword from '../pages/ForgotPassword';
 import ResetPassword from '../pages/ResetPassword';
-
 import { useAuthStore } from '../store/useAuthStore';
 import React from "react";
-import { useChatStore } from "../store/useChatStore";
+import FirendList from "../components/freindList";
+import SuggestFreinds from "../components/SuggestFreinds";
 
-// PrivateRoute Component
 const PrivateRoute = ({ children }) => {
-  const authUser = useAuthStore(state => state.authUser);  // Use hook here to get latest authUser
-  const {selectedUser}=useChatStore()
+  const {authUser} = useAuthStore();  
+
   if (!authUser) {
-    // agar logged in nahi hai to login page par bhej do
     return <Navigate to="/login" replace />;
   }
   return children;
@@ -59,7 +57,7 @@ const router = createBrowserRouter([
     ),
     children: [
       {
-  path: "chats",
+  path: "/",
   element: <MiddleSidebarLayout sidebar={<ChatListSidebar />} />,
   children: [
     {
@@ -71,19 +69,13 @@ const router = createBrowserRouter([
 ,
       {
         path: "status",
-        element: <MiddleSidebarLayout sidebar={<h1>Status</h1>} />,
-        children: [
-          {
-            index: true,
-            element: (
-              <h1 className="text-center mt-10 text-gray-500">📷 Select a status to view</h1>
-            ),
-          },
-          {
-            path: ":statusId",
-            element: <h1>StatusDetails</h1>,
-          },
-        ],
+        element: <MiddleSidebarLayout sidebar={<FirendList/>} />,
+         children: [
+    {
+      index: true,
+      element: <SuggestFreinds/>
+    },
+  ],
       },
     ],
   },

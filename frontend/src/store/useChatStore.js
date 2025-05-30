@@ -27,6 +27,7 @@ export const useChatStore = create((set, get) => ({
     }));
   },
 
+
   // get all users
   getUsers: async () => {
     set({ isUsersLoading: true });
@@ -41,17 +42,19 @@ export const useChatStore = create((set, get) => ({
   },
 
   // get all messages for a user
-  getMessages: async (userId) => {
-    set({ isMessagesLoading: true });
-    try {
-      const res = await axiosIntance.get(`/message/${userId}`);
-      set({ message: res.data.data });
-    } catch (error) {
-      toast.error(error?.response?.data?.message || "Something went wrong");
-    } finally {
-      set({ isMessagesLoading: false });
-    }
-  },
+getMessages: async (userId) => {
+  set({ isMessagesLoading: true });
+  try {
+    const res = await axiosIntance.get(`/message/${userId}`);
+    set({ message: res.data.data });
+  } catch (error) {
+    toast.error(error?.response?.data?.message || "Something went wrong");
+  } finally {
+    console.log("Setting loading: false");
+    set({ isMessagesLoading: false });
+  }
+}
+,
 
   // send message (image/text)
   sendMessages: async (messageData) => {
@@ -78,9 +81,47 @@ export const useChatStore = create((set, get) => ({
   },
 }));
 
+
 socket.on("newMessage", (msg) => {
   const { setMessages } = useChatStore.getState();
   setMessages((prev) => [...prev, msg]);
+});
+
+socket.on("messageSeen", ({ userId, seenFromUserId }) => {
+  const { setMessages } = useChatStore.getState();
+
+  setMessages((prevMessages) =>
+    prevMessages.map((msg) => {
+      
+      if (
+        msg.receiverId === userId &&
+        msg.senderId === seenFromUserId
+      ) {
+        return { ...msg, isSeen: true };
+      }
+      return msg;
+    })
+  );
+});
+
+
+
+socket.on("lastMessageUpdate", (data) => {
+  const { users } = useChatStore.getState();
+
+  const updatedUsers = users.map((user) => {
+    if (user._id === data.receiverId || user._id === data.senderId) {
+      return {
+        ...user,
+        lastMessage: data.message.text,
+        messageType:
+          data.message.senderId === user._id ? "received" : "sent",
+      };
+    }
+    return user;
+  });
+
+  useChatStore.setState({ users: updatedUsers });
 });
 
 

@@ -10,12 +10,11 @@
 
   const ChatListSidebar = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-      const { getUsers, users} = useChatStore();
+      const { getUsers, users,isUsersLoading} = useChatStore();
 
     const {authUser}=useAuthStore()
   const {isIconSidebarHide,IconSidebarToggle}=useLayoutStore()
 
-  const onlineUser=[]
 
   useEffect(()=>{
   getUsers()
@@ -27,7 +26,7 @@
           <div className="flex gap-3 items-center">
             <div className={`w-12  rounded-full`}>
               <img
-                src="https://cdn-icons-png.flaticon.com/128/3135/3135715.png"
+                src={authUser?.profilePic||"https://cdn-icons-png.flaticon.com/128/3135/3135715.png"}
                 alt="Logo"
               />
             </div>
@@ -41,7 +40,7 @@
             </div>
           </div>
 
-          <div onClick={IconSidebarToggle} className="cursor-pointer p-2">
+          <div onClick={IconSidebarToggle} className="cursor-pointer p-2 md:flex hidden">
     <Icon
       icon={isIconSidebarHide ? "ic:sharp-arrow-right" : "ic:sharp-arrow-left"}
       width={30}
@@ -83,12 +82,17 @@
   </div>
 
         </div>
-
-       <div className="flex-1 overflow-y-auto">
+{isUsersLoading?(
+  <div className="flex justify-center items-center">loading</div>
+):(
+<div className="flex-1 overflow-y-auto">
   {Array.isArray(users) && users.map((chat) => (
     <ChatListItem key={chat._id} chat={chat} />
   ))}
 </div>
+)}
+       
+
 
 
       </div>

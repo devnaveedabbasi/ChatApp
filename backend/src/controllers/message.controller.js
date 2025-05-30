@@ -5,13 +5,41 @@ import asyncHandler from "../utlis/asyncHandler.js";
 import {uploadOnCloudinary} from '../utlis/fileUpload.js'
 import Message from '../models/message.model.js'
 
-export const getUserForSidebar=asyncHandler(async(req,res)=>{
-    const loggedInUserId=req.user._id
+export const getUserForSidebar = asyncHandler(async (req, res) => {
+  const loggedInUserId = req.user._id;
 
-    const filteredUser=await User.find({_id:{$ne:loggedInUserId}}).select("-password -refreshToken")
+  const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select(
+    "-password -refreshToken"
+  );
 
-    return res.status(200).json(new ApiResponse(200,filteredUser,"succesfulyy fettch"))
-})
+  const usersWithLastMessage = await Promise.all(
+    filteredUsers.map(async (user) => {
+      const lastMessage = await Message.findOne({
+        $or: [
+          { senderId: loggedInUserId, receiverId: user._id },
+          { senderId: user._id, receiverId: loggedInUserId },
+        ],
+      })
+        .sort({ createdAt: -1 })
+        .limit(1);
+
+      return {
+        ...user._doc,
+        lastMessage: lastMessage ? lastMessage.text : null,
+        messageType: lastMessage
+          ? lastMessage.senderId.toString() === loggedInUserId.toString()
+            ? "sent"
+            : "received"
+          : null,
+      };
+    })
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, usersWithLastMessage, "Successfully fetched"));
+});
+
 
 
 export const getMessages = asyncHandler(async (req, res) => {
@@ -20,12 +48,30 @@ export const getMessages = asyncHandler(async (req, res) => {
 
   console.log("Fetching messages between:", myId, "and", userToChatId);
 
+
+  await Message.updateMany(
+  {
+    senderId: userToChatId,
+    receiverId: myId,
+    isSeen: false,
+  },
+  { $set: { isSeen: true } }
+);
+
+
   const messages = await Message.find({
     $or: [
       { senderId: myId, receiverId: userToChatId },
       { senderId: userToChatId, receiverId: myId },
     ],
   });
+
+ 
+req.app.get('io').emit("messageSeen", {
+  userId: myId,
+  seenFromUserId: userToChatId, 
+});
+
 
   return res
     .status(200)
@@ -57,7 +103,11 @@ export const sendMessage=asyncHandler(async(req,res)=>{
         image:imageUrl
     })
         req.app.get('io').emit('newMessage', newMessage);  
-
+req.app.get('io').emit("lastMessageUpdate", {
+  senderId: req.user._id,
+  receiverId: receiverId,
+  message: newMessage, 
+});
     await newMessage.save()
 
     return res.status(200).json(new ApiResponse(200,newMessage,"Send Message succesfuly"))

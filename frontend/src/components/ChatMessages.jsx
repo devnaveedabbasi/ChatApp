@@ -1,25 +1,27 @@
-import React, { useEffect, useRef } from 'react';
-import { useChatStore } from '../store/useChatStore';
-import { FormatMessageTime } from '../utlis/formatMessageTime'; 
-import { useAuthStore } from '../store/useAuthStore'
-import { ChatBg } from '../assets';
+import React, { useEffect, useRef } from "react";
+import { useChatStore } from "../store/useChatStore";
+import { FormatMessageTime } from "../utlis/formatMessageTime";
+import { useAuthStore } from "../store/useAuthStore";
+import { ChatBg } from "../assets";
+import { Icon } from "@iconify/react/dist/iconify.js";
 
 export default function ChatMessages() {
-  const { selectedUser, message, isMessagesLoading } = useChatStore();
+  const { selectedUser, message } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
 
   useEffect(() => {
     if (messageEndRef.current) {
-      messageEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [message]);
 
+ 
   return (
-<div
-  className="flex-1 overflow-y-auto p-4 space-y-4 bg-cover bg-center"
-  style={{ backgroundImage: `url(${ChatBg})` }}>
-
+    <div
+      className="flex-1 overflow-y-auto p-4 space-y-4 bg-cover bg-center"
+      // style={{ backgroundImage: `url(${ChatBg})` }}
+    >
       {Array.isArray(message) && message.length > 0 ? (
         message.map((msg) => {
           const isSender = msg.senderId === authUser._id;
@@ -27,26 +29,36 @@ export default function ChatMessages() {
           return (
             <div
               key={msg._id}
-              className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${isSender ? "justify-end" : "justify-start"}`}
             >
-              <div className={`flex gap-2 max-w-[70%] ${isSender ? 'flex-row-reverse' : 'flex-row'}`}>
+              <div
+                className={`flex gap-2 max-w-[70%] ${
+                  isSender ? "flex-row-reverse" : "flex-row"
+                }`}
+              >
                 {/* Profile Picture */}
                 <div className="w-10 h-10 rounded-full overflow-hidden border">
                   <img
-                    src={isSender ? authUser.profilePic || '' : selectedUser?.profilePic || ''}
+                    src={
+                      isSender
+                        ? authUser.profilePic || ""
+                        : selectedUser?.profilePic || ""
+                    }
                     alt="Profile"
                     className="w-full h-full object-cover"
                   />
                 </div>
 
                 {/* Message Content */}
-                {msg.text &&(
-<div
-                  className={`rounded-md px-4 py-3 text-sm break-words ${
-                    isSender ? 'bg-[#52AB86] text-white' : 'bg-white text-black'
-                  }`}
-                >
-                 <>
+                {msg.text && (
+                  <div
+                    className={`rounded-md px-4 py-3 flex gap-4 items-end  text-sm break-words ${
+                      isSender
+                        ? "bg-[#52AB86] text-white"
+                        : "bg-white text-black"
+                    }`}
+                  >
+                    <>
                       {msg.image && (
                         <img
                           src={msg.image}
@@ -55,19 +67,28 @@ export default function ChatMessages() {
                         />
                       )}
                     </>
-                  {msg.text && <p>{msg.text}</p>}
-                 
-                </div>
+                    {msg.text && <p>{msg.text}</p>}
+                    {isSender && msg.text && (
+                      <p>
+                        {msg.isSeen ? (
+                          <Icon
+                            icon="line-md:check-all"
+                            className="text-white-100"
+                            width={20}
+                            height={15}
+                          />
+                        ) : (
+                          <Icon icon="mdi:check" className="text" />
+                        )}
+                      </p>
+                    )}
+                  </div>
                 )}
-                
 
-
-
-                   <div
+                <div
                   className={`rounded-md px-4 py-3 text-sm break-words`}
-                  style={{ display: 'inline-block' }}
+                  style={{ display: "inline-block" }}
                 >
-                    
                   {(!msg.text || (!msg.text && msg.image)) && (
                     <>
                       {msg.image && (
@@ -80,7 +101,6 @@ export default function ChatMessages() {
                     </>
                   )}
                 </div>
-
               </div>
 
               {/* Timestamp */}
@@ -98,4 +118,3 @@ export default function ChatMessages() {
     </div>
   );
 }
-

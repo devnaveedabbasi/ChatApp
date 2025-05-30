@@ -1,31 +1,25 @@
 import mongoose from "mongoose";
+import { Schema } from "mongoose";
 
-const messageSchema = new mongoose.Schema(
+const friendRequestSchema = new Schema(
   {
-    senderId: {
+    sender: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    receiverId: {
+    receiver: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    text: {
+    status: {
       type: String,
+      enum: ["pending", "accepted", "rejected"],
+      default: "pending",
     },
-    image: {
-      type: String,
-    },
-    isSeen:{
-     type:Boolean,
-     default:false,
-    }
   },
   { timestamps: true }
 );
 
-const MessageModal = mongoose.model("Message", messageSchema);
-
-export default MessageModal;
+export const FriendModel = mongoose.model("Friend", friendRequestSchema);

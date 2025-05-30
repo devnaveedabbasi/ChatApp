@@ -2,24 +2,18 @@ import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 
 const ChatListItem = ({ chat }) => {
-  const { selectedUser, setSelectedUser, isUsersLoading } = useChatStore();
+  const { selectedUser, setSelectedUser, message } =useChatStore();
   const { onlineUsers } = useAuthStore();
-console.log(onlineUsers)
 
-  if (isUsersLoading) return 
-  <div className="!bg-red-700 h-screen w-full">
-<h1>Loading...</h1>;
-  </div>
-
+ 
   return (
     <div
       key={chat._id}
-    //   onClick={() => setSelectedUser(chat)}
+      //   onClick={() => setSelectedUser(chat)}
       onClick={() => {
-  console.log("Selected chat:", chat);
-  setSelectedUser(chat);
-}}
-
+        console.log("Selected chat:", chat);
+        setSelectedUser(chat);
+      }}
       className={`p-3 ${
         selectedUser?._id === chat._id ? "bg-gray-200" : "bg-white"
       } border-b border-gray-100 cursor-pointer flex items-center hover:bg-gray-50 relative`}
@@ -28,20 +22,22 @@ console.log(onlineUsers)
         <img
           src={chat?.profilePic}
           alt="User"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover "
         />
-        {onlineUsers.includes(chat._id) && (
-          <span className="absolute bottom-0 right-0 size-3 bg-green-500 rounded-full ring-2 ring-white" />
-        )}
       </div>
+      {onlineUsers.includes(chat._id) && (
+        <span className="absolute top-4  left-10  size-3 bg-green-500 rounded-full ring-2 ring-white" />
+      )}
 
       <div className="flex-1">
         <div className="flex justify-between items-center">
           <h3 className="font-medium">{chat.fullName}</h3>
         </div>
-        <p className="text-sm text-gray-500 truncate">
-          {chat.lastMessage || "No recent message"}
-        </p>
+        {chat?.messageType === "sent" ? (
+          <p className="text-sm text-gray-500 truncate">{chat.lastMessage}</p>
+        ) : (
+          <p className="text-sm text-green-400 truncate">{chat.lastMessage}</p>
+        )}
       </div>
 
       {chat.unread > 0 && (

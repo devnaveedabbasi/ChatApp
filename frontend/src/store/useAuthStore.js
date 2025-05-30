@@ -26,7 +26,7 @@ checkAuth: async () => {
     try {
       const res = await axiosIntance.get("/auth/check-auth");  
       set({ authUser: res.data.data });
-            // get().connectSocket();
+            get().checkOnline()
     } catch (error) {
       set({ authUser: null });
       console.log("Error in checkAuth:", error);
@@ -170,10 +170,10 @@ setOnlineUsers: (onlineUsers) => set({ onlineUsers }),
 
 
 
-connectSocket: () => {
+checkOnline: () => {
   const { authUser } = get();
   if (!authUser || get().socket?.connected) return;
-
+  console.log(authUser,'ss')
   
   socket.emit("addUser", authUser._id);
   set({ socket: socket });
