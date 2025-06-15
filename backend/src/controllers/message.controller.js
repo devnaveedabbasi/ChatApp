@@ -4,14 +4,33 @@ import { ApiResponse } from "../utlis/apiResponse.js";
 import asyncHandler from "../utlis/asyncHandler.js";
 import {uploadOnCloudinary} from '../utlis/fileUpload.js'
 import Message from '../models/message.model.js'
+import {FriendModel} from '../models/friendRequest.modal.js'
 
 export const getUserForSidebar = asyncHandler(async (req, res) => {
   const loggedInUserId = req.user._id;
 
-  const filteredUsers = await User.find({ _id: { $ne: loggedInUserId } }).select(
+  // ✅ Corrected query based on your Friend model
+  const friends = await FriendModel.find({
+    $or: [
+      { sender: loggedInUserId },
+      { receiver: loggedInUserId }
+    ],
+    status: "accepted",
+  });
+
+  // ✅ Extract IDs of friends
+  const friendUserIds = friends.map(friend => {
+    return friend.sender.toString() === loggedInUserId.toString()
+      ? friend.receiver
+      : friend.sender;
+  });
+
+  // ✅ Fetch user details excluding password & refreshToken
+  const filteredUsers = await User.find({ _id: { $in: friendUserIds } }).select(
     "-password -refreshToken"
   );
 
+  // ✅ Fetch last message per user
   const usersWithLastMessage = await Promise.all(
     filteredUsers.map(async (user) => {
       const lastMessage = await Message.findOne({
@@ -37,8 +56,10 @@ export const getUserForSidebar = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, usersWithLastMessage, "Successfully fetched"));
+    .json(new ApiResponse(200, usersWithLastMessage, "Successfully fetched friends"));
 });
+
+
 
 
 
@@ -80,37 +101,52 @@ req.app.get('io').emit("messageSeen", {
 
 
 
-export const sendMessage=asyncHandler(async(req,res)=>{
 
-    const {text}=req.body
-  const image = req.file?.path;  
+export const sendMessage = asyncHandler(async (req, res) => {
+  const { text } = req.body;
+  const image = req.file?.path;
+  const { id: receiverId } = req.params;
+  const senderId = req.user._id;
 
-    const {id:receiverId}=req.params
+  const isFriend = await FriendModel.findOne({
+    $or: [
+      { user1: senderId, user2: receiverId, status: "accepted" },
+      { user1: receiverId, user2: senderId, status: "accepted" },
+    ],
+  });
 
-    const senderId=req.user._id
+  if (!isFriend) {
+    return res
+      .status(403)
+      .json(new ApiResponse(403, null, "You are not friends with this user"));
+  }
 
-    let imageUrl
+  let imageUrl;
+  if (image) {
+    const uploadResponse = await uploadOnCloudinary(image);
+    imageUrl = uploadResponse.secure_url;
+  }
 
-    if(image){
-        const uploadResponse=await uploadOnCloudinary(image)
-        imageUrl=uploadResponse.secure_url
-    }
+  const newMessage = new Message({
+    senderId,
+    receiverId,
+    text,
+    image: imageUrl,
+  });
 
-    const newMessage=new Message({
-        senderId,
-        receiverId,
-        text,
-        image:imageUrl
-    })
-        req.app.get('io').emit('newMessage', newMessage);  
-req.app.get('io').emit("lastMessageUpdate", {
-  senderId: req.user._id,
-  receiverId: receiverId,
-  message: newMessage, 
+  await newMessage.save();
+
+  req.app.get("io").emit("newMessage", newMessage);
+  req.app.get("io").emit("lastMessageUpdate", {
+    senderId: req.user._id,
+    receiverId: receiverId,
+    message: newMessage,
+  });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, newMessage, "Send Message successfully"));
 });
-    await newMessage.save()
 
-    return res.status(200).json(new ApiResponse(200,newMessage,"Send Message succesfuly"))
-})
 
 

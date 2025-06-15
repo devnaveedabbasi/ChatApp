@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import Welcome from "./Welcome";
 import MessageInput from "./MessageInput";
 import ChatMessages from "./ChatMessages";
+import { Toaster } from "react-hot-toast";
 
 const ChatContainer = () => {
   const { selectedUser, message, isMessagesLoading, getMessages } =
@@ -42,6 +43,8 @@ const ChatContainer = () => {
   }
 
   return (
+    <>
+          <Toaster position="top-right" reverseOrder={false} />  
     <div
       className={`w-full h-screen flex-1 flex flex-col bg-cover bg-center`}
       style={{ backgroundImage: `url(${ChatBg})` }}
@@ -54,6 +57,8 @@ const ChatContainer = () => {
 
       <MessageInput />
     </div>
+    </>
+
   );
 };
 

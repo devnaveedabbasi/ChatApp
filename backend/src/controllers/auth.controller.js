@@ -2,19 +2,25 @@ import { User } from "../models/auth.model.js";
 import { ApiError } from "../utlis/apiError.js";
 import { ApiResponse } from "../utlis/apiResponse.js";
 import asyncHandler from "../utlis/asyncHandler.js";
-import {uploadOnCloudinary} from '../utlis/fileUpload.js'
-import { sendResetPasswordEmail, sendVerificationCode, wellcomeEmail } from "../libs/mailsender.lib.js";
+import { uploadOnCloudinary } from "../utlis/fileUpload.js";
+import {
+  sendResetPasswordEmail,
+  sendVerificationCode,
+  wellcomeEmail,
+} from "../libs/mailsender.lib.js";
 import { generateAccessTokenAndRefreshToken } from "../utlis/generateAccesRefreshToken.js";
-import jwt from 'jsonwebtoken'
-import bcrypt from 'bcrypt'
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 export const registerUser = asyncHandler(async (req, res) => {
-  const { fullName, email,password } = req.body;
+  const { fullName, email, password } = req.body;
 
   if (!fullName || !email || !password) {
-    throw new ApiError(400,`${!fullName? "fullName" : !email ? "Email" : "Password"} is required.`)
-}
-
+    throw new ApiError(
+      400,
+      `${!fullName ? "fullName" : !email ? "Email" : "Password"} is required.`
+    );
+  }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
@@ -34,7 +40,6 @@ export const registerUser = asyncHandler(async (req, res) => {
   //   throw new ApiError(501, "avatar uploading error");
   // }
 
-
   const existedUser = await User.findOne({ email });
   if (existedUser) {
     throw new ApiError(408, "User already exists");
@@ -45,9 +50,8 @@ export const registerUser = asyncHandler(async (req, res) => {
   ).toString();
   const expiry = new Date(Date.now() + 59 * 1000); // 59 seconds expiry for testing
 
-  
-// const baseUrl = `${req.protocol}://${req.get("host")}`;
-// const avatarLocalPath = `${baseUrl}/images/${avatar}`
+  // const baseUrl = `${req.protocol}://${req.get("host")}`;
+  // const avatarLocalPath = `${baseUrl}/images/${avatar}`
 
   const user = await User.create({
     fullName,
@@ -58,11 +62,13 @@ export const registerUser = asyncHandler(async (req, res) => {
     verificationCodeExpires: expiry,
   });
 
-  const createdUser = await User.findById(user._id).select("-password -verificationCode -verificationCodeExpires");
+  const createdUser = await User.findById(user._id).select(
+    "-password -verificationCode -verificationCodeExpires"
+  );
 
   await sendVerificationCode(user.email, verificationCode);
 
-  return res 
+  return res
     .status(201)
     .json(
       new ApiResponse(
@@ -129,7 +135,9 @@ export const verifyUser = asyncHandler(async (req, res) => {
   await wellcomeEmail(user.email, user.fullName);
 
   // Cleaned user data
-  const userData = await User.findById(user._id).select("-password -refreshToken");
+  const userData = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
 
   // Send response
   return res
@@ -162,7 +170,9 @@ export const resendOtp = asyncHandler(async (req, res) => {
     throw new ApiError(403, "User not found");
   }
 
-  const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const verificationCode = Math.floor(
+    100000 + Math.random() * 900000
+  ).toString();
   const expiry = new Date(Date.now() + 30 * 1000);
 
   user.verificationCode = verificationCode;
@@ -171,9 +181,11 @@ export const resendOtp = asyncHandler(async (req, res) => {
 
   await sendVerificationCode(user.email, verificationCode);
 
-  return res.status(200).json(
-    new ApiResponse(200, { verificationCode }, "Resent OTP verification")
-  );
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, { verificationCode }, "Resent OTP verification")
+    );
 });
 
 export const login = asyncHandler(async (req, res) => {
@@ -226,7 +238,6 @@ export const login = asyncHandler(async (req, res) => {
     );
 });
 
-
 export const logout = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
@@ -250,35 +261,36 @@ export const logout = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, "User logged out successfully"));
 });
 
-
-
 export const forgetPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
-    throw new ApiError(403, 'Email is required');
+    throw new ApiError(403, "Email is required");
   }
 
   const user = await User.findOne({ email });
   if (!user) {
-    throw new ApiError(401, 'User not found');
+    throw new ApiError(401, "User not found");
   }
 
   const resetToken = jwt.sign(
     { id: user._id },
     process.env.RESET_TOKEN_SECRET,
-    { expiresIn: '15m' }
+    { expiresIn: "15m" }
   );
 
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${encodeURIComponent(resetToken)}`;
+  const resetUrl = `${
+    process.env.FRONTEND_URL
+  }/reset-password?token=${encodeURIComponent(resetToken)}`;
 
   await sendResetPasswordEmail(email, resetUrl);
 
-  res.status(200).json(new ApiResponse(200,resetUrl,"Reset link has been sent to your email")
-  
-);
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, resetUrl, "Reset link has been sent to your email")
+    );
 });
-
 
 export const resetPassword = asyncHandler(async (req, res) => {
   const token = decodeURIComponent(req.query.token);
@@ -311,7 +323,6 @@ export const resetPassword = asyncHandler(async (req, res) => {
 
   res.status(200).json(new ApiResponse(200, {}, "Password reset successfully"));
 });
-
 
 export const refreshToken = asyncHandler(async (req, res) => {
   const incomingRefreshToken =
@@ -346,7 +357,7 @@ export const refreshToken = asyncHandler(async (req, res) => {
 
     const options = {
       httpOnly: true, // For security reasons, don't allow JS access
-      secure: true,   // Ensure it works only over HTTPS in production
+      secure: true, // Ensure it works only over HTTPS in production
     };
 
     // Send new tokens in the response cookies
@@ -370,38 +381,57 @@ export const refreshToken = asyncHandler(async (req, res) => {
   }
 });
 
-
 export const updateProfile = async (req, res) => {
-  const file = req.file;
+  try {
+    const { fullName } = req.body;
+    const file = req.file;
 
-  if (!file) {
-    throw new ApiError(403, "ProfilePic is required");
+    const userId = req.user?._id;
+    if (!userId) {
+      throw new ApiError(404, "User not found");
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    if (fullName) {
+      user.fullName = fullName;
+    }
+
+    const localPath = file?.path;
+    if (!localPath && !user.profilePic) {
+      throw new ApiError(400, "Profile picture is required");
+    }
+    if (localPath) {
+      const uploadpic = await uploadOnCloudinary(localPath);
+      user.profilePic = uploadpic.secure_url; // Use secure_url
+      // const uploadpic = await cloudinary.uploader.upload(localPath, {
+      //   resource_type: "image", // Make sure this is set
+      //   folder: "profilePics", // Optional: for organization
+      // });
+    }
+
+    await user.save();
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, user, "User updated successfully"));
+  } catch (error) {
+    res
+      .status(error.statusCode || 500)
+      .json(new ApiResponse(error.statusCode || 500, null, error.message));
   }
+};
 
-  const userId = req.user?._id;
-
-  if (!userId) {
+export const checkAuth = asyncHandler(async (req, res) => {
+  const user = req.user;
+  if (!user) {
     throw new ApiError(404, "User not found");
   }
 
-  const uploadpic = await uploadOnCloudinary(file.path);
-
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    { profilePic: uploadpic.secure_url },
-    { new: true }
-  );
-
-  res.status(200).json(new ApiResponse(200, updatedUser, "User updated successfully"));
-};
-
-export const checkAuth=asyncHandler(async(req,res)=>{
-  const user=req.user
-  if(!user){
-    throw new ApiError(404,"User not found")
-  }
-
-  return res.status(200).json(new ApiResponse(200,user,"User fetch succesfully"))
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "User fetch succesfully"));
 });
-
-

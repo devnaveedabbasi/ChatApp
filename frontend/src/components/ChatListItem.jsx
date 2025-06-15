@@ -2,16 +2,17 @@ import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 
 const ChatListItem = ({ chat }) => {
-  const { selectedUser, setSelectedUser, message } =useChatStore();
+  const { selectedUser, setSelectedUser } =useChatStore();
   const { onlineUsers } = useAuthStore();
 
  
   return (
-    <div
+    <>
+    
+<div
       key={chat._id}
       //   onClick={() => setSelectedUser(chat)}
       onClick={() => {
-        console.log("Selected chat:", chat);
         setSelectedUser(chat);
       }}
       className={`p-3 ${
@@ -46,6 +47,9 @@ const ChatListItem = ({ chat }) => {
         </div>
       )}
     </div>
+    
+    </>
+
   );
 };
 

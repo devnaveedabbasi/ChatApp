@@ -11,7 +11,8 @@ export default function Otp() {
   const [showResend, setShowResend] = useState(false);
   const navigate = useNavigate();
   const inputRefs = useRef([]);
-  const { verifyOtp, isVerifying, resendOtp, isResending ,setToken} = useAuthStore();
+  const { verifyOtp, isVerifying, resendOtp, isResending, setToken } =
+    useAuthStore();
 
   // Countdown timer logic
   useEffect(() => {
@@ -39,25 +40,24 @@ export default function Otp() {
       }
     }
   };
-const handleVerify = async () => {
-  const code = otp.join("");
-  if (code.length !== 6) return;
+  const handleVerify = async () => {
+    const code = otp.join("");
+    if (code.length !== 6) return;
 
-  try {
-    const res = await verifyOtp({ code });
-
-    if (res?.success && res?.token) {
-      setToken(res.token); 
-      navigate('/');       
-    } else {
-      console.log("OTP verification failed");
+    try {
+      const res = await verifyOtp({ code });
+      console.log("data", res.data);
+      console.log("res", res);
+      if (res.success) {
+        navigate(`/friends`);
+      } else {
+        console.log("OTP verification failed");
+      }
+    } catch (err) {
+      console.error("Error verifying OTP", err);
     }
-  } catch (err) {
-    console.error("Error verifying OTP", err);
-  }
-};
+  };
 
-  
   const handleResend = async () => {
     if (!userId) return;
     const res = await resendOtp(userId);
@@ -68,7 +68,11 @@ const handleVerify = async () => {
   };
 
   if (isResending) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
   }
 
   return (

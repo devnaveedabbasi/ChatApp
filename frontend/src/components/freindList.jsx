@@ -4,9 +4,14 @@ import { useLayoutStore } from "../store/useLayout";
 import { AnimatePresence, motion } from "framer-motion";
 import { useFriendStore } from "../store/useFriendStore";
 import { Toaster } from "react-hot-toast";
+import { useChatStore } from "../store/useChatStore";
+import { useNavigate } from "react-router-dom";
+import SidebarHeader from "./sidebarHeader";
 
 export default function FriendList() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const { setSelectedUser } = useChatStore();
+  const navigate = useNavigate();
   const {
     isAllFriends,
     isAllFriendsLoading,
@@ -26,19 +31,16 @@ export default function FriendList() {
     isCancelRequestLoading,
     removeSentRequest,
     sendRequest,
-    allSuggestedFriends
+    allSuggestedFriends,
+    requestSentCount,
   } = useFriendStore();
-  const { isIconSidebarHide, IconSidebarToggle } = useLayoutStore();
+  const [activeTab, setActiveTab] = useState("Friends");
 
   useEffect(() => {
     allFriends();
     getRequest();
     getSentRequest();
-  }, []);
-
-
-
-
+  }, [requestSentCount]);
 
   console.log(isAllFriends, "all frindds");
   console.log(isGetRequest);
@@ -64,68 +66,25 @@ export default function FriendList() {
     } catch (error) {}
   };
 
-    const  handleCancel= async (user) => {
+  const handleCancel = async (requestId) => {
     try {
-      const res = await cancelRequest({ receiverId: user });
+      const res = await cancelRequest({ receiverId: requestId });
+      console.log(res);
       if (res.success) {
-        console.log('s')
-        removeSentRequest(user)
+        removeSentRequest(requestId);
+        getSentRequest();
+        allSuggestedFriends();
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
-
-
-  const [activeTab, setActiveTab] = useState("Friends");
-
-  const [friends, setFriends] = useState([
-    {
-      id: 1,
-      fullName: "Ali",
-      email: "ali@gmail.com",
-      profile: "https://cdn-icons-png.flaticon.com/128/10438/10438143.png",
-    },
-  ]);
-
-  const [requests, setRequests] = useState([
-    {
-      id: 2,
-      fullName: "Ahmed",
-      email: "ahmed@gmail.com",
-      profile: "https://cdn-icons-png.flaticon.com/128/10438/10438143.png",
-    },
-  ]);
-
-  const [pending, setPending] = useState([
-    {
-      id: 3,
-      fullName: "Sara",
-      email: "sara@gmail.com",
-      profile: "https://cdn-icons-png.flaticon.com/128/10438/10438143.png",
-    },
-  ]);
 
   return (
     <div className="w-full">
       <Toaster />
 
-      <div className="p-4 border-b border-gray-300 flex justify-between items-center">
-        <h1 className="text-gray-800 font-medium text-[19px]">Friend List</h1>
-        <div
-          onClick={IconSidebarToggle}
-          className="cursor-pointer p-2 md:flex hidden"
-        >
-          <Icon
-            icon={
-              isIconSidebarHide ? "ic:sharp-arrow-right" : "ic:sharp-arrow-left"
-            }
-            width={30}
-            height={30}
-            className="text-[#52AB86]"
-          />
-        </div>
-      </div>
+      <SidebarHeader title="Friends" />
 
       {/* Header */}
       <div className="p-3 border-b border-gray-300 flex justify-between items-center">
@@ -185,6 +144,10 @@ export default function FriendList() {
               isAllFriends.map((user) => (
                 <div
                   key={user._id}
+                  onClick={() => {
+                    setSelectedUser(user);
+                    navigate("/");
+                  }}
                   className="flex items-center justify-between p-4 border-b border-gray-300"
                 >
                   <div className="flex items-center gap-1">
@@ -266,7 +229,7 @@ export default function FriendList() {
               <div>Loading...</div>
             ) : isSentRequest && isSentRequest.length > 0 ? (
               isSentRequest.map((request) => {
-                const user = request.receiver
+                const user = request.receiver;
                 return (
                   <div
                     key={request._id}
@@ -287,11 +250,11 @@ export default function FriendList() {
                       <div className="flex gap-2">
                         {/* Pass request._id here */}
                         <button
-                      onClick={() => handleCancel(user._id)}
-                      className="bg-[#52ab86] text-white px-2 ml-3 text-sm p-1 rounded-full"
-                    >
-                      {isCancelRequestLoading ? "Loading" : "Cancel"}
-                    </button>
+                          onClick={() => handleCancel(user._id)}
+                          className="bg-[#52ab86] text-white px-2 ml-3 text-sm p-1 rounded-full"
+                        >
+                          {isCancelRequestLoading ? "Loading" : "Cancel"}
+                        </button>
                       </div>
                     </div>
                   </div>

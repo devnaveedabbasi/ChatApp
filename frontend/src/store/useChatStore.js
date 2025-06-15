@@ -72,7 +72,7 @@ getMessages: async (userId) => {
         }
       );
 
-      set({ message: [...message, res.data.data] }); // res.data.data = newMessage
+      set({ message: [...message, res.data.data] });
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     } finally {

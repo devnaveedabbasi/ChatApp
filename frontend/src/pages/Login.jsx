@@ -27,7 +27,7 @@ export default function Login() {
     e.preventDefault();
     setSubmitAttempted(true);
     await formik.handleSubmit();
-    
+
     try {
       const formData = {
         email: formik.values.email,
@@ -35,13 +35,11 @@ export default function Login() {
       };
 
       const res = await login(formData);
-      console.log(res)
-      if(res.status===200){
-        console.log('sd')
+      console.log(res);
+      if (res.success) {
         navigate(`/`);
+        window.location.reload();
       }
-
-     
     } catch (error) {
       console.error("Login failed:", error);
     }

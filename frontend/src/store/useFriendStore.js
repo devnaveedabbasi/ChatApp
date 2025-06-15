@@ -17,18 +17,25 @@ export const useFriendStore = create((set, get) => ({
     isSentRequest:[],
     IsSentRequestLoading:false,
     isCancelRequestLoading:false,
-    sendRequest:async(receiverId)=>{
-        set({IssendRequestLoading:true})
-       try {
-            const res = await axiosIntance.post("/friend/request",receiverId);
-                        get().getRequest()
-            return res.data
-          } catch (error) {
-            toast.error(error?.response?.data?.message || "Something went wrong");
-          } finally {
-            set({ IssendRequestLoading: false });
-          }
-    }
+    requestSentCount: 0,
+incrementRequestSent: () => set((state) => ({
+  requestSentCount: state.requestSentCount + 1
+}))
+,
+    sendRequest: async (receiverId) => {
+  set({ IssendRequestLoading: true });
+  try {
+    const res = await axiosIntance.post("/friend/request", receiverId);
+    get().getRequest();
+    get().incrementRequestSent(); // ✅ yeh line add karo
+    return res.data;
+  } catch (error) {
+    toast.error(error?.response?.data?.message || "Something went wrong");
+  } finally {
+    set({ IssendRequestLoading: false });
+  }
+}
+
 
 ,
      acceptFriend:async(requestId)=>{
@@ -149,12 +156,24 @@ removeFriend: (id) =>
       (user) => user._id !== id
     ),
   })),
-  removeSentRequest: (id) =>
+
+// removeSentRequest: (id) =>
+//   set((state) => ({
+//     isSentRequest: state.isSentRequest.filter(
+//       (request) => request._id !== id
+//     ),
+//   })),
+
+
+ removeSentRequest: (id) => {
+  console.log(id);
   set((state) => ({
     isSentRequest: state.isSentRequest.filter(
-      (user) => user._id !== id
+      (request) => request._id !== id
     ),
-  })),
+  }));
+}
+
 }))
 
 

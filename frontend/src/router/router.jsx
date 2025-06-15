@@ -1,25 +1,26 @@
 // routes.jsx
 import { createBrowserRouter, Navigate } from "react-router-dom";
 
-import MainLayout from '../layout/MainLayout';
-import MiddleSidebarLayout from '../layout/MiddleSidebarLayout';
+import MainLayout from "../layout/MainLayout";
+import MiddleSidebarLayout from "../layout/MiddleSidebarLayout";
 
-import ChatListSidebar from '../components/ChatListSidebar';
-import ChatContainer from '../components/ChatContainer';
+import ChatListSidebar from "../components/ChatListSidebar";
+import ChatContainer from "../components/ChatContainer";
 
-import SignUpPage from '../pages/SignUp';
-import LoginPage from '../pages/Login';
-import ProfilePage from '../pages/Profile';
-import OtpPage from '../pages/VerifyOtp';
-import ForgotPassword from '../pages/ForgotPassword';
-import ResetPassword from '../pages/ResetPassword';
-import { useAuthStore } from '../store/useAuthStore';
+import SignUpPage from "../pages/SignUp";
+import LoginPage from "../pages/Login";
+import OtpPage from "../pages/VerifyOtp";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
+import { useAuthStore } from "../store/useAuthStore";
 import React from "react";
 import FirendList from "../components/freindList";
-import SuggestFreinds from "../components/SuggestFreinds";
+import SuggestFreinds from "../pages/SuggestFreinds";
+import Profile from "../components/Profile";
+import UpdateProfile from "../pages/UpdateProfile";
 
 const PrivateRoute = ({ children }) => {
-  const {authUser} = useAuthStore();  
+  const { authUser } = useAuthStore();
 
   if (!authUser) {
     return <Navigate to="/login" replace />;
@@ -57,25 +58,34 @@ const router = createBrowserRouter([
     ),
     children: [
       {
-  path: "/",
-  element: <MiddleSidebarLayout sidebar={<ChatListSidebar />} />,
-  children: [
-    {
-      index: true,
-      element: <ChatContainer />,
-    },
-  ],
-}
-,
+        path: "/",
+        element: <MiddleSidebarLayout sidebar={<ChatListSidebar />} />,
+        children: [
+          {
+            index: true,
+            element: <ChatContainer />,
+          },
+        ],
+      },
       {
-        path: "status",
-        element: <MiddleSidebarLayout sidebar={<FirendList/>} />,
-         children: [
-    {
-      index: true,
-      element: <SuggestFreinds/>
-    },
-  ],
+        path: "friends",
+        element: <MiddleSidebarLayout sidebar={<FirendList />} />,
+        children: [
+          {
+            index: true,
+            element: <SuggestFreinds />,
+          },
+        ],
+      },
+      {
+        path: "profile",
+        element: <MiddleSidebarLayout sidebar={<Profile />} />,
+        children: [
+          {
+            index: true,
+            element: <UpdateProfile />,
+          },
+        ],
       },
     ],
   },
