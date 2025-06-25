@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
+eAut;
 import * as Yup from "yup";
 import { Logo, SignUpBanner } from "../assets";
 import InputField from "../components/InputField";
-import { useAuthStore } from "../store/useAuthStore";
+import { useAuthStore } from "../store/ushStore";
 import { Link, useNavigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
-export default function SignUpPage() {``
+export default function SignUpPage() {
+  ``;
   const [showPassword, setShowPassword] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const navigate = useNavigate();
@@ -37,26 +39,25 @@ export default function SignUpPage() {``
     await formik.handleSubmit();
 
     try {
-        const formData = {
-            fullName: formik.values.fullname,
-            email: formik.values.email,
-            password: formik.values.password,
-        };
+      const formData = {
+        fullName: formik.values.fullname,
+        email: formik.values.email,
+        password: formik.values.password,
+      };
 
-        const res = await signup(formData);
-        console.log('Signup result:', res);
-        
-        if (res.data.user._id) {
-            navigate(`/verify-otp/${res.data.user._id}`);
-        } else {
-            console.error('User ID not found in response');
-        }
+      const res = await signup(formData);
+      console.log("Signup result:", res);
+
+      if (res.data.user._id) {
+        navigate(`/verify-otp/${res.data.user._id}`);
+      } else {
+        console.error("User ID not found in response");
+      }
     } catch (error) {
-        console.error('Signup failed:', error);
-    
+      console.error("Signup failed:", error);
     }
-};
-  
+  };
+
   const formik = useFormik({
     initialValues: {
       fullname: "",
@@ -127,11 +128,13 @@ export default function SignUpPage() {``
           </form>
           <p className="text-gray-500 md:text-lg text-md mt-5 mb-6">
             Already have an account?{" "}
-            <Link to="/login" className="link cursor-pointer text-[#01aa85] link-primary">
+            <Link
+              to="/login"
+              className="link cursor-pointer text-[#01aa85] link-primary"
+            >
               Sign in
             </Link>
           </p>
-          
 
           {/* <div className="flex justify-center items-center gap-4 mb-6">
             <div className="bg-red-600 transition-all ease-in duration-100 p-3 md:p-4 text-white cursor-pointer hover:bg-[#52AA86] rounded-full">
