@@ -10,7 +10,7 @@ import {
   resetPassword,
   updateProfile,
   verifyUser,
-} from "../controllers/auth.controller.js";
+} from "../controllers/auth.controllers.js";
 import protectedRoute from "../middlewears/auth.middlewares.js";
 import { upload } from "../middlewears/multer.middlewares.js";
 

@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { useFormik } from "formik";
-eAut;
 import * as Yup from "yup";
 import { Logo, SignUpBanner } from "../assets";
 import InputField from "../components/InputField";
-import { useAuthStore } from "../store/ushStore";
+import { useAuthStore } from "../store/useAuthStore"
 import { Link, useNavigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
